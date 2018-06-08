@@ -7,21 +7,21 @@ Installation:
 Use the curl or wget command to grab script as follows:
 
 ```
-$ wget https://raw.githubusercontent.com/nixcraft/domain-check-2/master/domain-check-2.sh
+$ wget https://raw.githubusercontent.com/mpohoda/domain-check-pro/master/domain-check-pro.sh
 ## [ sample domain list for testing purpose ] ##
-$ wget https://raw.githubusercontent.com/nixcraft/domain-check-2/master/domain-list.txt
+$ wget https://raw.githubusercontent.com/mpohoda/domain-check-pro/master/domain-list.txt
 ## [ install it in /usr/local/bin dir ] ##
-$ sudo cp -vf domain-check-2.sh /usr/local/bin/domain-check-2
-$ sudo chmod +x /usr/local/bin/domain-check-2.sh
+$ sudo cp -vf domain-check-pro.sh /usr/local/bin/domain-check-pro
+$ sudo chmod +x /usr/local/bin/domain-check-pro.sh
 ```
 
 Usage:
 ------
 Run it as follows:
 ```
-$ domain-check-2 -d google.com
-$ domain-check-2 -d cyberciti.biz
-$ domain-check-2 -f domain-list.txt
+$ domain-check-pro -d google.com
+$ domain-check-pro -d cyberciti.biz
+$ domain-check-pro -f domain-list.txt
 ```
 Sample outputs:
 ```
@@ -43,13 +43,13 @@ websialive.com                      Tucows Domains In                   Valid   
 [Setup Unix/Linux cron job](https://www.cyberciti.biz/faq/how-do-i-add-jobs-to-cron-under-linux-or-unix-oses/)  as follows to get email notification to send expiration notices:
 
 ```
-@daily /path/to/domain-check-2.sh -f /path/to/your-domains.txt -e you@example.com
+@daily /path/to/domain-check-pro.sh -f /path/to/your-domains.txt -e you@example.com
 ```
 Getting help
 ------------
 ```
-$ domain-check-2.sh -h
-Usage: domain-check-2.sh [ -e email ] [ -x expir_days ] [ -q ] [ -a ] [ -h ]
+$ domain-check-pro.sh -h
+Usage: domain-check-pro.sh [ -e email ] [ -x expir_days ] [ -q ] [ -a ] [ -h ]
           {[ -d domain_namee ]} || { -f domainfile}
 
   -a               : Send a warning message through email
@@ -64,6 +64,7 @@ Usage: domain-check-2.sh [ -e email ] [ -x expir_days ] [ -q ] [ -a ] [ -h ]
 
 Authors:
 --------
-* Origianl Authors: Matty https://github.com/Matty9191
-*               and nixCraft https://www.cyberciti.biz/tips/domain-check-script.html
+* Origianl Authors: 
+	- Matty https://github.com/Matty9191
+	- nixCraft https://www.cyberciti.biz/tips/domain-check-script.html
 * I added new features for domain check like web status, certificate status and add support for v .sk and .br C/TLDS.
