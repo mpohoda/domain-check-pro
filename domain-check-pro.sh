@@ -411,7 +411,7 @@ check_domain_status()
     # If the Registrar is NULL, then we didn't get any data
     if [ "${REGISTRAR}" = "" ]
     then
-        prints "$DOMAIN" "Unknown" "Unknown" "Unknown" "Unknown"
+        prints "$DOMAIN" "Unknown" "Unknown" "Unknown" "Unknown" "Unknown" "Unknown"
         return
     fi
 
