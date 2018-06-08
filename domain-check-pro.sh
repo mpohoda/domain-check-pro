@@ -871,7 +871,7 @@ print_heading()
 {
         if [ "${QUIET}" != "TRUE" ]
         then
-                printf "\n%-35s %-35s %-8s %-11s %-7s %-11s %-27s\n" "Domain" "Registrar" "Status" "Expires" "Days Left" "HTTP Status" "Certificate Status"
+                printf "\n%-35s %-35s %-8s %-11s %-9s %-11s %-27s\n" "Domain" "Registrar" "Status" "Expires" "Days Left" "HTTP Status" "Certificate Status"
                 echo "----------------------------------- ----------------------------------- -------- ----------- --------- ----------- ------------------"
         fi
 }
@@ -890,7 +890,7 @@ prints()
     if [ "${QUIET}" != "TRUE" ]
     then
             MIN_DATE=$(echo $3 | ${AWK} '{ print $1, $2, $4 }')
-            printf "%-35s %-35s %-8s %-11s %-7s %-11s %-27s\n" "$1" "$5" "$2" "$MIN_DATE" "$4" "$6" "$7"
+            printf "%-35s %-35s %-8s %-11s %-9s %-11s %-27s\n" "$1" "$5" "$2" "$MIN_DATE" "$4" "$6" "$7"
     fi
 }
 
