@@ -184,6 +184,8 @@ WHOIS=`which whois`
 DATE=`which date`
 CUT=`which cut`
 GREP=`which grep`
+SED=`which sed`
+OPENSSL=$(which openssl)
 TR=`which tr`
 MAIL=`which mail`
 
@@ -823,7 +825,33 @@ check_domain_status()
     DOMAINDATE=`cat ${WHOIS_TMP} | ${AWK} '/Expiration/ { print $NF }'`
     fi
 
-    CERTIFICATE=`echo | openssl s_client -servername ${DOMAIN} -connect ${DOMAIN}:443 2>/dev/null | openssl x509 -noout -checkend "$((3600*24*${WARNDAYS}))" 2>/dev/null`
+    CERTIFICATE=`echo | ${OPENSSL} s_client -servername ${DOMAIN} -connect ${DOMAIN}:443 2>/dev/null | ${OPENSSL} x509 -noout -checkend "$((3600*24*${WARNDAYS}))" 2>/dev/null`
+    CERTDATE=`echo | ${OPENSSL} s_client -servername ${DOMAIN} -connect ${DOMAIN}:443 2>/dev/null | ${OPENSSL} x509 -enddate -noout -inform pem 2>/dev/null | ${SED} 's/notAfter\=//'`
+
+    TODAY=$( date +%s )
+    CERTEXP=$( date -d "${CERTDATE}" +%s )
+    CERTDIFF="$(( (${CERTEXP} - $TODAY) / (3600 * 24) ))"
+
+    if [ ${CERTDIFF} -le 0 ]
+    then
+          if [ "${ALARM}" = "TRUE" ]
+          then
+                echo "Certificate for domain ${DOMAIN} has expired!" \
+                | ${MAIL} -s "Certificate for domain ${DOMAIN} has expired!" ${ADMIN}
+          fi
+          CERTSTATUS="Expired"
+
+    elif [ ${CERTDIFF} -lt ${WARNDAYS} ]
+    then
+           if [ "${ALARM}" == "TRUE" ]
+           then
+                    echo "Certificate for domain ${DOMAIN} will expire on ${CERTDATE}" \
+                    | ${MAIL} -s "Certificate for domain ${DOMAIN} will expire in ${CERTDIFF}-days" ${ADMIN}
+           fi
+           CERTSTATUS="Expiring"
+     else
+           CERTSTATUS="Valid"
+     fi
 
     HTTPSTATUS=`curl -ILs qualityunit.com --max-redirs 5 | tac | grep -m1 HTTP/ | awk {'print $2'}`
 
@@ -844,20 +872,19 @@ check_domain_status()
           then
                 echo "The domain ${DOMAIN} has expired!" \
                 | ${MAIL} -s "Domain ${DOMAIN} has expired!" ${ADMIN}
-           fi
+          fi
 
-           prints "${DOMAIN}" "Expired" "${DOMAINDATE}" "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTIFICATE}"
-
+           prints "${DOMAIN}" "Expired" "${DOMAINDATE}" "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTSTATUS}" "${CERTDIFF}"
     elif [ ${DOMAINDIFF} -lt ${WARNDAYS} ]
     then
            if [ "${ALARM}" == "TRUE" ]
            then
                     echo "The domain ${DOMAIN} will expire on ${DOMAINDATE}" \
-                    | ${MAIL} -s "Domain ${DOMAIN} will expire in ${WARNDAYS}-days or less" ${ADMIN}
+                    | ${MAIL} -s "Domain ${DOMAIN} will expire in ${DOMAINDIFF}-days" ${ADMIN}
             fi
-            prints "${DOMAIN}" "Expiring" "${DOMAINDATE}" "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTIFICATE}"
+            prints "${DOMAIN}" "Expiring" "${DOMAINDATE}" "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTSTATUS}" "${CERTDIFF}"
      else
-            prints "${DOMAIN}" "Valid" "${DOMAINDATE}"  "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTIFICATE}"
+            prints "${DOMAIN}" "Valid" "${DOMAINDATE}"  "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTSTATUS}" "${CERTDIFF}"
      fi
 
 }
@@ -871,8 +898,8 @@ print_heading()
 {
         if [ "${QUIET}" != "TRUE" ]
         then
-                printf "\n%-35s %-35s %-8s %-11s %-9s %-11s %-27s\n" "Domain" "Registrar" "Status" "Expires" "Days Left" "HTTP Status" "Certificate Status"
-                echo "----------------------------------- ----------------------------------- -------- ----------- --------- ----------- ------------------"
+                printf "\n%-35s %-35s %-8s %-11s %-9s %-9s %-11s %-11s\n" "Domain" "Registrar" "Status" "Expires" "Days Left" "HTTP Status" "Cert Status" "Cert D Left"
+                echo "----------------------------------- ----------------------------------- -------- ----------- --------- ----------- ----------- -----------"
         fi
 }
 
@@ -890,7 +917,7 @@ prints()
     if [ "${QUIET}" != "TRUE" ]
     then
             MIN_DATE=$(echo $3 | ${AWK} '{ print $1, $2, $4 }')
-            printf "%-35s %-35s %-8s %-11s %-9s %-11s %-27s\n" "$1" "$5" "$2" "$MIN_DATE" "$4" "$6" "$7"
+            printf "%-35s %-35s %-8s %-11s %-9s %-9s %-11s %-11s\n" "$1" "$5" "$2" "$MIN_DATE" "$4" "$6" "$7" "$8"
     fi
 }
 
