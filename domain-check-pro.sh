@@ -867,7 +867,7 @@ check_domain_status()
 
           if ${GREP} -i "Connection refused" ${ERROR_TMP} > /dev/null
           then
-                CERTSTATUS="No certifi."
+                CERTSTATUS="No certificate"
                 CERTDIFF=""
           fi
 
