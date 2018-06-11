@@ -188,9 +188,32 @@ SED=`which sed`
 OPENSSL=$(which openssl)
 TR=`which tr`
 MAIL=`which mail`
+MKTEMP=$(which mktemp)
+PRINTF=$(which printf)
 
 # Place to stash temporary files
 WHOIS_TMP="/var/tmp/whois.$$"
+CERT_TMP=$($MKTEMP /var/tmp/cert.XXXXXX)
+ERROR_TMP=$($MKTEMP /var/tmp/error.XXXXXX)
+
+### Check to make sure the mktemp and printf utilities are available
+if [ ! -f ${MKTEMP} ] || [ ! -f ${PRINTF} ]
+then
+    echo "ERROR: Unable to locate the mktemp or printf binary."
+    echo "FIX: Please modify the \${MKTEMP} and \${PRINTF} variables in the program header."
+    exit 1
+fi
+
+### Touch the files prior to using them
+if [ ! -z "${CERT_TMP}" ] && [ ! -z "${ERROR_TMP}" ]
+then
+    touch ${CERT_TMP} ${ERROR_TMP}
+else
+    echo "ERROR: Problem creating temporary files"
+    echo "FIX: Check that mktemp works on your system"
+    exit 1
+fi
+
 
 #############################################################################
 # Purpose: Convert a date from MONTH-DAY-YEAR to Julian format
@@ -840,6 +863,13 @@ check_domain_status()
                 | ${MAIL} -s "Certificate for domain ${DOMAIN} has expired!" ${ADMIN}
           fi
           CERTSTATUS="Expired"
+          echo "" | ${OPENSSL} s_client -servername ${DOMAIN} -connect ${DOMAIN}:443 2> ${ERROR_TMP} 1> ${CERT_TMP}
+
+          if ${GREP} -i "Connection refused" ${ERROR_TMP} > /dev/null
+          then
+                CERTSTATUS="No certifi."
+                CERTDIFF=""
+          fi
 
     elif [ ${CERTDIFF} -lt ${WARNDAYS} ]
     then
