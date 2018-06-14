@@ -886,7 +886,18 @@ check_domain_status()
            CERTSTATUS="Valid"
      fi
 
-    HTTPSTATUS=`curl -ILs qualityunit.com --max-redirs 5 | tac | grep -m1 HTTP/ | awk {'print $2'}`
+    HTTPSTAT=`curl -ILs qualityunit.com --max-redirs 5 | tac | grep -m1 HTTP/ | awk {'print $2'}`
+    if [ "${HTTPSTAT}" == "200" ]
+    then
+        HTTPSTATUS="OK"
+    else
+        if [ "${ALARM}" == "TRUE" ]
+        then
+            echo "HTTP status for domain ${DOMAIN} is ${HTTPSTAT}." \
+            | ${MAIL} -s "HTTP status for domain ${DOMAIN} is not correct!" -a "From: ${MAILFROM}" ${ADMIN}
+         fi
+        HTTPSTATUS="ERROR"
+    fi
 
     #echo $DOMAINDATE # debug
     # Whois data should be in the following format: "13-feb-2006"
