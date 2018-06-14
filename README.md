@@ -25,20 +25,21 @@ $ domain-check-pro -f domain-list.txt
 ```
 Sample outputs:
 ```
-Domain                              Registrar                           Status   Expires     Days Left HTTP Status Certificate Status
------------------------------------ ----------------------------------- -------- ----------- --------- ----------- ------------------
-affplanet.com                       Wild West Domains                   Valid    19-jan-2019   225     200         Certificate will not expire
-beezdesk.com                        PSI-USA, Inc. dba                   Valid    04-may-2019   330     200         Certificate will not expire
-getreply.com                        Wild West Domains                   Valid    17-oct-2019   496     200         Certificate will not expire
-ladesk.com                          Wild West Domains                   Valid    01-may-2025   2519    200         Certificate will not expire
-liveagent.jp                        interwork                           Expiring 30-jun-2018   22      200         Certificate will not expire
-liveagent.se                        Ascio                               Valid    19-nov-2018   164     200         Certificate will not expire
-liveagent.sk                        Quality Unit                        Valid    30-oct-2022   1605    200         Certificate will not expire
-postaffiliatenetwork.com            Wild West Domains                   Valid    16-feb-2019   253     200         Certificate will not expire
-postaffiliatepro.com                Wild West Domains                   Valid    20-may-2025   2538    200         Certificate will not expire
-qualityunit.com                     Wild West Domains                   Valid    29-oct-2022   1604    200         Certificate will not expire
-unitminer.com                       Wild West Domains                   Valid    29-oct-2022   1604    200         Certificate will not expire
-websialive.com                      Tucows Domains In                   Valid    01-apr-2019   297     200
+Domain                    Registrar                 Status   Expires     Days Left HTTP Status Cert Status Cert Valid  Cert D Left
+------------------------- ------------------------- -------- ----------- --------- ----------- ----------- ----------- -----------
+affplanet.com             Wild West Domains         Valid    19-jan-2019   219       200       Valid       28-sep-2019 470        
+beezdesk.com              PSI-USA, Inc. dba         Valid    04-may-2019   324       200       Valid       20-dec-2018 188        
+getreply.com              Wild West Domains         Valid    17-oct-2019   490       200       Valid       28-sep-2019 470        
+ladesk.com                Wild West Domains         Valid    01-may-2025   2513      200       Valid       16-júl-2020 762        
+liveagent.jp              interwork                 Expiring 30-jun-2018   16        200       Valid       05-dec-2018 173        
+liveagent.se              Ascio                     Valid    19-nov-2018   158       200       Valid       19-mar-2019 277        
+liveagent.sk              Quality Unit              Valid    30-oct-2022   1599      200       Valid       28-sep-2019 470        
+postaffiliatenetwork.com  Wild West Domains         Valid    16-feb-2019   247       200       Valid       12-jan-2019 211        
+postaffiliatepro.com      Wild West Domains         Valid    20-may-2025   2532      200       Valid       28-sep-2019 470        
+qualityunit.com           Wild West Domains         Valid    29-oct-2022   1598      200       Valid       09-júl-2020 755        
+unitminer.com             Wild West Domains         Valid    29-oct-2022   1598      200       Valid       28-sep-2019 470        
+websialive.com            Tucows Domains In         Valid    01-apr-2019   291       200       No cert                            
+websialive.com.br         WebSIA Soluções Disruptiv Valid    23-mar-2019   282       200       Valid       21-dec-2018 189        
 ```
 [Setup Unix/Linux cron job](https://www.cyberciti.biz/faq/how-do-i-add-jobs-to-cron-under-linux-or-unix-oses/)  as follows to get email notification to send expiration notices:
 

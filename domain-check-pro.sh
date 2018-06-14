@@ -164,8 +164,8 @@ PATH=/bin:/usr/bin:/usr/local/bin:/usr/local/ssl/bin:/usr/sfw/bin
 export PATH
 
 # Who to page when an expired domain is detected (cmdline: -e)
-ADMIN="sysadmin@mydomain.com"
-
+ADMIN="mpohoda@qualityunit.com"
+MAILFROM="mpohoda@qualityunit.com"
 # Number of days in the warning threshhold  (cmdline: -x)
 WARNDAYS=30
 
@@ -427,7 +427,7 @@ check_domain_status()
        REGISTRAR=`cat ${WHOIS_TMP} | ${GREP} "holder:" -m 1 | ${AWK} -F' ' '{print $2}'`
     elif [ "${TLDTYPE}" == "br" ];
     then
-       REGISTRAR=`cat ${WHOIS_TMP} | ${GREP} "owner:" -m 1 | ${AWK} -F: '/owner:/ && $2 != ""  { REGISTRAR=substr($2,8,35) } END { print REGISTRAR }'`
+       REGISTRAR=`cat ${WHOIS_TMP} | ${GREP} "owner:" -m 1 | ${AWK} -F: '/owner:/ && $2 != ""  { REGISTRAR=substr($2,8,25) } END { print REGISTRAR }'`
     elif [ "${TLDTYPE}" == "sk" ];
     then
        REGISTRAR=`cat ${WHOIS_TMP} | ${GREP} "Name:" -m 1 | ${AWK} -F[:,] '{gsub(/^[ \t]+/,"",$2);  print $2}'`
@@ -488,7 +488,7 @@ check_domain_status()
 	             10) tmonth=oct ;;
 	             11) tmonth=nov ;;
 	             12) tmonth=dec ;;
-              	      *) tmonth=0 ;;
+              	 *) tmonth=0 ;;
 		esac
             tday=`echo ${tdomdate} | ${CUT} -d'-' -f3`
 	    DOMAINDATE=`echo $tday-$tmonth-$tyear`
@@ -535,7 +535,7 @@ check_domain_status()
 	             10) tmonth=oct ;;
 	             11) tmonth=nov ;;
 	             12) tmonth=dec ;;
-               	      *) tmonth=0 ;;
+               	 *) tmonth=0 ;;
 		esac
             tday=`echo ${tdomdate} | ${CUT} -d'-' -f3`
 	    DOMAINDATE=`echo $tday-$tmonth-$tyear`
@@ -557,7 +557,7 @@ check_domain_status()
 	             10) tmonth=oct ;;
 	             11) tmonth=nov ;;
 	             12) tmonth=dec ;;
-               	      *) tmonth=0 ;;
+               	 *) tmonth=0 ;;
 		esac
             tday=`echo ${tdomdate} | ${AWK} '{print substr($1,7,2)}'`
 	    DOMAINDATE=`echo $tday-$tmonth-$tyear`
@@ -703,19 +703,19 @@ check_domain_status()
           tyear=`echo ${tdomdate} | ${CUT} -d'.' -f1`
           tmon=`echo ${tdomdate} | ${CUT} -d'.' -f2`
           case ${tmon} in
-	     1|01) tmonth=jan ;;
-	     2|02) tmonth=feb ;;
-	     3|03) tmonth=mar ;;
-	     4|04) tmonth=apr ;;
-	     5|05) tmonth=may ;;
-	     6|06) tmonth=jun ;;
-	     7|07) tmonth=jul ;;
-	     8|08) tmonth=aug ;;
-	     9|09) tmonth=sep ;;
-	     10) tmonth=oct ;;
-	     11) tmonth=nov ;;
-	     12) tmonth=dec ;;
-	     *) tmonth=0 ;;
+	            1|01) tmonth=jan ;;
+	            2|02) tmonth=feb ;;
+	            3|03) tmonth=mar ;;
+	            4|04) tmonth=apr ;;
+	            5|05) tmonth=may ;;
+	            6|06) tmonth=jun ;;
+	            7|07) tmonth=jul ;;
+	            8|08) tmonth=aug ;;
+	            9|09) tmonth=sep ;;
+	            10) tmonth=oct ;;
+	            11) tmonth=nov ;;
+	            12) tmonth=dec ;;
+	            *) tmonth=0 ;;
           esac
           tday=`echo ${tdomdate} | ${CUT} -d'.' -f3`
           DOMAINDATE=`echo "${tday}-${tmonth}-${tyear}"`
@@ -853,22 +853,25 @@ check_domain_status()
 
     TODAY=$( date +%s )
     CERTEXP=$( date -d "${CERTDATE}" +%s )
+    CERTVALID=$( date '+%d-%b-%Y' -d "${CERTDATE}" )
     CERTDIFF="$(( (${CERTEXP} - $TODAY) / (3600 * 24) ))"
 
     if [ ${CERTDIFF} -le 0 ]
     then
-          if [ "${ALARM}" = "TRUE" ]
-          then
-                echo "Certificate for domain ${DOMAIN} has expired!" \
-                | ${MAIL} -s "Certificate for domain ${DOMAIN} has expired!" ${ADMIN}
-          fi
-          CERTSTATUS="Expired"
           echo "" | ${OPENSSL} s_client -servername ${DOMAIN} -connect ${DOMAIN}:443 2> ${ERROR_TMP} 1> ${CERT_TMP}
 
           if ${GREP} -i "Connection refused" ${ERROR_TMP} > /dev/null
           then
-                CERTSTATUS="No certificate"
+                CERTSTATUS="No cert"
                 CERTDIFF=""
+                CERTVALID=""
+          else
+                if [ "${ALARM}" = "TRUE" ]
+                then
+                     echo "Certificate for domain ${DOMAIN} has expired!" \
+                     | ${MAIL} -s "Certificate for domain ${DOMAIN} has expired!" -a "From: ${MAILFROM}" ${ADMIN}
+                fi
+          CERTSTATUS="Expired"
           fi
 
     elif [ ${CERTDIFF} -lt ${WARNDAYS} ]
@@ -876,7 +879,7 @@ check_domain_status()
            if [ "${ALARM}" == "TRUE" ]
            then
                     echo "Certificate for domain ${DOMAIN} will expire on ${CERTDATE}" \
-                    | ${MAIL} -s "Certificate for domain ${DOMAIN} will expire in ${CERTDIFF}-days" ${ADMIN}
+                    | ${MAIL} -s "Certificate for domain ${DOMAIN} will expire in ${CERTDIFF}-day(s)" -a "From: ${MAILFROM}" ${ADMIN}
            fi
            CERTSTATUS="Expiring"
      else
@@ -901,20 +904,20 @@ check_domain_status()
           if [ "${ALARM}" == "TRUE" ]
           then
                 echo "The domain ${DOMAIN} has expired!" \
-                | ${MAIL} -s "Domain ${DOMAIN} has expired!" ${ADMIN}
+                | ${MAIL} -s "Domain ${DOMAIN} has expired!" -a "From: ${MAILFROM}" ${ADMIN}
           fi
 
-           prints "${DOMAIN}" "Expired" "${DOMAINDATE}" "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTSTATUS}" "${CERTDIFF}"
+           prints "${DOMAIN}" "Expired" "${DOMAINDATE}" "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTSTATUS}"  "${CERTVALID}" "${CERTDIFF}"
     elif [ ${DOMAINDIFF} -lt ${WARNDAYS} ]
     then
            if [ "${ALARM}" == "TRUE" ]
            then
                     echo "The domain ${DOMAIN} will expire on ${DOMAINDATE}" \
-                    | ${MAIL} -s "Domain ${DOMAIN} will expire in ${DOMAINDIFF}-days" ${ADMIN}
+                    | ${MAIL} -s "Domain ${DOMAIN} will expire in ${DOMAINDIFF}-day(s)" -a "From: ${MAILFROM}" ${ADMIN}
             fi
-            prints "${DOMAIN}" "Expiring" "${DOMAINDATE}" "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTSTATUS}" "${CERTDIFF}"
+            prints "${DOMAIN}" "Expiring" "${DOMAINDATE}" "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTSTATUS}" "${CERTVALID}" "${CERTDIFF}"
      else
-            prints "${DOMAIN}" "Valid" "${DOMAINDATE}"  "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTSTATUS}" "${CERTDIFF}"
+            prints "${DOMAIN}" "Valid" "${DOMAINDATE}"  "${DOMAINDIFF}" "${REGISTRAR}" "${HTTPSTATUS}" "${CERTSTATUS}" "${CERTVALID}" "${CERTDIFF}"
      fi
 
 }
@@ -928,8 +931,8 @@ print_heading()
 {
         if [ "${QUIET}" != "TRUE" ]
         then
-                printf "\n%-35s %-35s %-8s %-11s %-9s %-9s %-11s %-11s\n" "Domain" "Registrar" "Status" "Expires" "Days Left" "HTTP Status" "Cert Status" "Cert D Left"
-                echo "----------------------------------- ----------------------------------- -------- ----------- --------- ----------- ----------- -----------"
+                printf "\n%-25s %-25s %-8s %-11s %-9s %-9s %-11s %-11s %-11s\n" "Domain" "Registrar" "Status" "Expires" "Days Left" "HTTP Status" "Cert Status" "Cert Valid" "Cert D Left"
+                echo "------------------------- ------------------------- -------- ----------- --------- ----------- ----------- ----------- -----------"
         fi
 }
 
@@ -947,7 +950,7 @@ prints()
     if [ "${QUIET}" != "TRUE" ]
     then
             MIN_DATE=$(echo $3 | ${AWK} '{ print $1, $2, $4 }')
-            printf "%-35s %-35s %-8s %-11s %-9s %-9s %-11s %-11s\n" "$1" "$5" "$2" "$MIN_DATE" "$4" "$6" "$7" "$8"
+            printf "%-25s %-25s %-8s %-11s %-9s %-9s %-11s %-11s %-11s\n" "$1" "$5" "$2" "$MIN_DATE" "$4" "$6" "$7" "$8" "$9"
     fi
 }
 
