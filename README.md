@@ -1,4 +1,4 @@
-Domain Expiration Check Shell Script
+Domain and SSL certificates expiration check Shell Script with notifications about expiring.
 ====================================
 A simple shell script to display or notify the user via email about domain status and expiry date.
 
